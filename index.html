@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Recommender</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 1rem auto;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: 2px solid #4a90e2;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            padding: 0.5rem 1.5rem;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .search-button:hover {
+            background-color: #357abd;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .tab.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #4a90e2;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .anime-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .anime-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .anime-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+
+        .anime-card-content {
+            padding: 1rem;
+        }
+
+        .anime-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+        }
+
+        .anime-type {
+            font-size: 0.775rem;
+            color: #ffffff;
+            background-color: rgb(108, 0, 108);
+            border-radius: 10px;
+            padding: 0.3rem;
+            max-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .synopsis {
+            text-align: justify;
+        }
+
+        .anime-synopsis {
+            font-size: 0.875rem;
+            color: #000000;
+            text-align: justify;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+        }
+
+        .anime-detail {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .detail-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .anime-image {
+            flex-shrink: 0;
+            width: 300px;
+        }
+
+        .anime-image img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .anime-info {
+            flex: 1;
+            padding: 0 1rem;
+        }
+
+        .anime-info h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .anime-info p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .recommendations {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .recommendations h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #ff0000;
+        }
+
+        @media (max-width: 768px) {
+            .detail-header {
+                flex-direction: column;
+            }
+
+            .anime-image {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>AMICOM - Anime Recommender</h1>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search anime..."
+            onkeypress="if(event.key === 'Enter') searchAnime()">
+        <button onclick="searchAnime()" class="search-button">Search</button>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-source="all">All</button>
+            <button class="tab" data-source="manga">Manga</button>
+            <button class="tab" data-source="original">Original</button>
+            <button class="tab" data-source="light novel">Light Novel</button>
+        </div>
+
+        <div id="content"></div>
+
+        <div class="pagination">
+            <button id="prevPage" class="page-btn" disabled>Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextPage" class="page-btn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/anime';
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentSource = 'all';
+        let isSearchMode = false;
+        const ITEMS_PER_PAGE = 15;
+
+        function renderAnimeGrid(animes) {
+            return `
+                <div class="anime-grid">
+                    ${animes.map(anime => `
+                        <div class="anime-card" onclick="showAnimeDetails(${anime.mal_id})">
+                            <img src="${anime.image || '/api/placeholder/200/280'}" alt="${anime.name}">
+                            <div class="anime-card-content">
+                                <div class="anime-title">${anime.name}</div>
+                                <div class="anime-type">${anime.type || 'Unknown type'}</div>
+                                <div class="anime-synopsis">${(anime.synopsis || 'Unknown')}.</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderAnimeDetails(anime, recommendations) {
+            return `
+                <div class="anime-detail">
+                    <button class="back-btn" onclick="goBack()">← Back to List</button>
+                    
+                    <div class="detail-header">
+                        <div class="anime-image">
+                            <img src="${anime.image || '/api/placeholder/300/400'}" alt="${anime.name}">
+                        </div>
+                        <div class="anime-info">
+                            <h2>${anime.name}</h2>
+                            <p><strong>Type:</strong> ${anime.type || 'Unknown'}</p>
+                            <p><strong>Source:</strong> ${anime.source || 'Unknown'}</p>
+                            <p><strong>Genre:</strong> ${anime.genre || 'Unknown'}</p>
+                            <p class="synopsis">${anime.synopsis || 'No synopsis available.'}</p>
+                        </div>
+                    </div>
+
+                    <div class="recommendations">
+                        <h3>Semilir Anime for You</h3>
+                        <div class="recommendations-grid">
+                            ${recommendations.map(rec => `
+                                <div class="anime-card" onclick="showAnimeDetails(${rec.mal_id})">
+                                    <img src="${rec.image || '/api/placeholder/150/200'}" alt="${rec.name}">
+                                    <div class="anime-card-content">
+                                        <div class="anime-title">${rec.name}</div>
+                                        <div class="anime-type">${rec.type}</div>
+                                        <div class="anime-synopsis">${rec.synopsis}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function searchAnime() {
+            const searchQuery = document.getElementById('searchInput').value.trim();
+            if (!searchQuery) return;
+
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Searching...</div>';
+            isSearchMode = true;
+
+            try {
+                const response = await fetch(`${API_URL}/recommend?name=${searchQuery}`);
+                const data = await response.json();
+
+                if (data.recommendations && data.recommendations.length > 0) {
+                    content.innerHTML = renderAnimeGrid(data.recommendations);
+                    document.querySelector('.pagination').style.display = 'none';
+                } else {
+                    content.innerHTML = '<div class="loading">No results found</div>';
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="error">Error searching anime.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        function resetSearch() {
+            document.querySelector('.pagination').style.display = 'flex';
+            document.getElementById('searchInput').value = '';
+            isSearchMode = false;
+            currentPage = 1;
+            fetchAnimeList(currentSource, currentPage);
+        }
+
+        async function fetchAnimeList(source = 'all', page = 1) {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+            isSearchMode = false;
+
+            try {
+                const response = await fetch(`${API_URL}/filter?source=${source}&page=${page}&limit=${ITEMS_PER_PAGE}`);
+                const data = await response.json();
+
+                if (data.results) {
+                    content.innerHTML = renderAnimeGrid(data.results);
+                    totalPages = Math.ceil(data.query.total_results / ITEMS_PER_PAGE);
+                    updatePagination();
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="error">Error loading anime list.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function showAnimeDetails(malId) {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const detailResponse = await fetch(`${API_URL}/detail?mal_id=${malId}`);
+                const detailData = await detailResponse.json();
+
+                if (detailData[0]) {
+                    const anime = detailData[0];
+                    const recommendResponse = await fetch(`${API_URL}/recommend?name=${anime.name}`);
+                    const recommendData = await recommendResponse.json();
+
+                    content.innerHTML = renderAnimeDetails(anime, recommendData.recommendations || []);
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="error">Error loading anime details.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        function updatePagination() {
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+
+        function goBack() {
+            if (isSearchMode) {
+                searchAnime();
+            } else {
+                fetchAnimeList(currentSource, currentPage);
+            }
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelector('.tab.active').classList.remove('active');
+                e.target.classList.add('active');
+                currentSource = e.target.dataset.source;
+                currentPage = 1;
+                document.getElementById('searchInput').value = '';
+                isSearchMode = false;
+                fetchAnimeList(currentSource, currentPage);
+            });
+        });
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                if (isSearchMode) {
+                    searchAnime();
+                } else {
+                    fetchAnimeList(currentSource, currentPage);
+                }
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                if (isSearchMode) {
+                    searchAnime();
+                } else {
+                    fetchAnimeList(currentSource, currentPage);
+                }
+            }
+        });
+
+        fetchAnimeList();
+    </script>
+</body>
+</html>
