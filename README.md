@@ -5,7 +5,7 @@
 ## Detail
 ![image](https://github.com/user-attachments/assets/35d5fc16-56e1-458c-b342-1645c2d20f77)
 
-# Panduan Instalasi Aplikasi Flask
+# Panduan Instalasi
 
 Panduan ini akan membantu Anda dalam melakukan instalasi dan menjalankan aplikasi Flask beserta semua dependensi yang diperlukan.
 
@@ -80,7 +80,7 @@ pip install -r requirements.txt
 ## Menjalankan Aplikasi
 
 1. Pastikan virtual environment Anda sudah aktif
-2. Jalankan aplikasi Flask:
+2. Jalankan aplikasi:
 
 ```bash
 # Windows
